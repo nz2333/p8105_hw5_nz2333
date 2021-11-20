@@ -1,0 +1,46 @@
+---
+title: "p8105_hw5_nz2333"
+author: "nz2333"
+date: "11/20/2021"
+output: github_document
+---
+
+
+```{r}
+library(tidyverse)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+## Porblem 2
+```{r}
+df_p2 = tibble(
+  file = list.files(
+  "./data"))
+
+read_data = function(name) {
+  read_csv(str_c("./data/", name))
+}
+
+df_p2 = df_p2 %>%
+  mutate(data = map(file, read_data)) %>%
+  unnest(data) %>%
+  mutate(file = str_replace(file, ".csv", "")) %>%
+  separate(file, into = c("Arm", "ID"), sep = "_")
+  
+```
+

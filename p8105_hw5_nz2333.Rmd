@@ -26,7 +26,63 @@ scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
 
-## Porblem 2
+## Problem 1
+```{r message = FALSE}
+data_p1 = read_csv(url("https://raw.githubusercontent.com/washingtonpost/data-homicides/master/homicide-data.csv"))
+```
+
+The datset has 52179 observations and 12 variables. It provides information on reported homicides in the U.S., with victims' names, race, age, sex, reported date, location: city, state, longitude, and latitude; and disposition. 
+
+_City_state, Homicides number, Unsolved number_
+```{r}
+data_p1  = data_p1 %>%
+  mutate(
+    city_state = paste(city, state, sep = ", ")
+  )
+
+homicides = data_p1 %>%
+  group_by(city_state) %>%
+  summarize(homicides = n())
+
+unsolved = data_p1 %>%
+  filter(disposition %in% c("Closed without arrest", "Open/No arrest")) %>%
+  group_by(city_state) %>%
+  summarize(unsolved = n())
+
+summary = left_join(homicides, unsolved, by = "city_state")
+
+knitr::kable(summary)
+```
+
+```{r}
+Baltimore = summary %>%
+  filter(city_state == "Baltimore, MD")
+
+result = prop.test(Baltimore %>% pull(unsolved), Baltimore %>% pull(homicides)) %>%
+  broom::tidy()
+
+result
+```
+
+```{r}
+test = function(summary) {
+  test_result = prop.test(
+    summary %>% pull(unsolved), summary %>% pull(homicides)) %>%
+    broom::tidy() 
+    tibble(
+      proportion = test_result %>% pull(estimate), 
+      lowCI = test_result %>% pull(conf.low), 
+      highCI = test_result %>% pull(conf.high)
+    )
+
+}
+
+test(Baltimore)
+
+```
+
+
+## Problem 2
 ```{r}
 df_p2 = tibble(
   file = list.files(
@@ -62,7 +118,7 @@ plot
 
 The observations are similar at the beginning. The control arm fluctuated but show a steady trend over time. The experimental arms show positive slopes that the observations are increasing over time. 
 
-## Porblem 3
+## Problem 3
 ```{r}
 set.seed(10)
 
